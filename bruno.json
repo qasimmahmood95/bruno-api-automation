@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "Restful Booker API Testing",
+  "name": "bruno-api-automation",
   "type": "collection",
   "ignore": [
     "node_modules",
