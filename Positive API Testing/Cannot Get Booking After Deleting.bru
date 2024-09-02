@@ -1,0 +1,20 @@
+meta {
+  name: Cannot Get Booking After Deleting
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/booking/{{bookingId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 404
+}
+
+docs {
+  Generated from cURL: curl -i https://restful-booker.herokuapp.com/booking/1
+  
+}

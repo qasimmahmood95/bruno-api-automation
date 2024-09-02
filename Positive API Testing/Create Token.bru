@@ -1,0 +1,40 @@
+meta {
+  name: Create Token
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/auth
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+      "username" : "admin",
+      "password" : "password123"
+  }
+}
+
+vars:post-response {
+  token: res.body.token
+}
+
+assert {
+  res.status: eq 200
+}
+
+docs {
+  Generated from cURL: curl -X POST \
+    https://restful-booker.herokuapp.com/auth \
+    -H 'Content-Type: application/json' \
+    -d '{
+      "username" : "admin",
+      "password" : "password123"
+  }'
+}

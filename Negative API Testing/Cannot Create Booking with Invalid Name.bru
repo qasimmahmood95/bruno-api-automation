@@ -1,0 +1,50 @@
+meta {
+  name: Cannot Create Booking with Invalid Name
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/booking
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+      "firstname" : 1,
+      "lastname" : 1,
+      "totalprice" : 999,
+      "depositpaid" : true,
+      "bookingdates" : {
+          "checkin" : "1924-01-01",
+          "checkout" : "1925-01-01"
+      },
+      "additionalneeds" : "Halal Food"
+  }
+}
+
+assert {
+  res.status: eq 500
+}
+
+docs {
+  Generated from cURL: curl -X POST \
+    https://restful-booker.herokuapp.com/booking \
+    -H 'Content-Type: application/json' \
+    -d '{
+      "firstname" : "Jim",
+      "lastname" : "Brown",
+      "totalprice" : 111,
+      "depositpaid" : true,
+      "bookingdates" : {
+          "checkin" : "2018-01-01",
+          "checkout" : "2019-01-01"
+      },
+      "additionalneeds" : "Breakfast"
+  }'
+}

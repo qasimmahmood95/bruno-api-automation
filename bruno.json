@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Restful Booker API Testing",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

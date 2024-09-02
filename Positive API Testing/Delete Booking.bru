@@ -1,0 +1,27 @@
+meta {
+  name: Delete Booking
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/booking/{{bookingId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: token={{token}}
+}
+
+assert {
+  res.status: eq 201
+}
+
+docs {
+  Generated from cURL: curl -X DELETE \
+    https://restful-booker.herokuapp.com/booking/1 \
+    -H 'Content-Type: application/json' \
+    -H 'Cookie: token=abc123'
+}

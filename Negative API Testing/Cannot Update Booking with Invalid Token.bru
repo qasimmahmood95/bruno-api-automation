@@ -1,0 +1,54 @@
+meta {
+  name: Cannot Update Booking with Invalid Token
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/booking/1
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+  Cookie: token=abc123
+}
+
+body:json {
+  {
+      "firstname" : "Qasim",
+      "lastname" : "Mahmood",
+      "totalprice" : 999,
+      "depositpaid" : true,
+      "bookingdates" : {
+          "checkin" : "2024-01-01",
+          "checkout" : "2025-01-01"
+      },
+      "additionalneeds" : "Halal Food and Entertainment"
+  }
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Generated from cURL: curl -X PUT \
+    https://restful-booker.herokuapp.com/booking/1 \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -H 'Cookie: token=abc123' \
+    -d '{
+      "firstname" : "James",
+      "lastname" : "Brown",
+      "totalprice" : 111,
+      "depositpaid" : true,
+      "bookingdates" : {
+          "checkin" : "2018-01-01",
+          "checkout" : "2019-01-01"
+      },
+      "additionalneeds" : "Breakfast"
+  }'
+}

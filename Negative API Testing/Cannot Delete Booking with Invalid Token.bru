@@ -1,0 +1,27 @@
+meta {
+  name: Cannot Delete Booking with Invalid Token
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/booking/1
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: token=abc123
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Generated from cURL: curl -X DELETE \
+    https://restful-booker.herokuapp.com/booking/1 \
+    -H 'Content-Type: application/json' \
+    -H 'Cookie: token=abc123'
+}

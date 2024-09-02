@@ -1,0 +1,27 @@
+meta {
+  name: Get Booking
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/booking/{{bookingId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+  res.body: isDefined
+  res.body.firstname: eq "Qasim"
+}
+
+docs {
+  Generated from cURL: curl -i https://restful-booker.herokuapp.com/booking/1
+  
+}

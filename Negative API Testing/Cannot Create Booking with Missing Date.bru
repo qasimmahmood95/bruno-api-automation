@@ -1,0 +1,49 @@
+meta {
+  name: Cannot Create Booking with Missing Date
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/booking
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+      "firstname" : "Qasim",
+      "lastname" : "Mahmood",
+      "totalprice" : 111,
+      "depositpaid" : true,
+      "bookingdates" : {
+          "checkin" : "2024-01-01"
+      },
+      "additionalneeds" : "Halal Food"
+  }
+}
+
+assert {
+  res.status: eq 500
+}
+
+docs {
+  Generated from cURL: curl -X POST \
+    https://restful-booker.herokuapp.com/booking \
+    -H 'Content-Type: application/json' \
+    -d '{
+      "firstname" : "Jim",
+      "lastname" : "Brown",
+      "totalprice" : 111,
+      "depositpaid" : true,
+      "bookingdates" : {
+          "checkin" : "2018-01-01",
+          "checkout" : "2019-01-01"
+      },
+      "additionalneeds" : "Breakfast"
+  }'
+}

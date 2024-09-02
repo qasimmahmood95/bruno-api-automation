@@ -1,0 +1,41 @@
+meta {
+  name: Partial Update Booking
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/booking/{{bookingId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+  Cookie: token={{token}}
+}
+
+body:json {
+  {
+      "totalprice" : 1000
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body: isDefined 
+  res.body.totalprice: eq 1000
+}
+
+docs {
+  Generated from cURL: curl -X PATCH \
+    https://restful-booker.herokuapp.com/booking/1 \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -H 'Cookie: token=abc123' \
+    -d '{
+      "firstname" : "James",
+      "lastname" : "Brown"
+  }'
+}

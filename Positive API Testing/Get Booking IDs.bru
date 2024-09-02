@@ -1,0 +1,20 @@
+meta {
+  name: Get Booking IDs
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/booking
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+}
+
+docs {
+  Generated from cURL: curl -i https://restful-booker.herokuapp.com/booking
+  
+}
