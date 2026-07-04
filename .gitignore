@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Test reports
+reports/
+
+# Environment secrets
+.env
+
+# Logs
+*.log
+
+# OS files
+.DS_Store

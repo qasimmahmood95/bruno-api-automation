@@ -1,0 +1,62 @@
+name: API Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Nightly at 06:17 UTC — off the top of the hour, where GitHub delays
+    # or drops scheduled runs under load
+    - cron: "17 6 * * *"
+
+permissions:
+  contents: read
+  checks: write # required by the JUnit report action to create check runs
+
+jobs:
+  api-tests:
+    name: Run Bruno API tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The target is a shared public demo API on Heroku; one retry absorbs
+      # cold starts and transient downtime without masking real failures.
+      - name: Run API tests with reporting
+        uses: nick-fields/retry@v3
+        with:
+          command: npm run test:report
+          max_attempts: 2
+          timeout_minutes: 10
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: reports/
+          retention-days: 14
+
+      # GITHUB_TOKEN is read-only on pull requests from forks, so check-run
+      # creation would fail there; skip the summary instead of failing a
+      # green run.
+      - name: Publish test summary
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: reports/junit.xml
+          check_name: Bruno API Test Results
+          require_tests: true
