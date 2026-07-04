@@ -10,11 +10,6 @@ post {
   auth: none
 }
 
-headers {
-  Content-Type: application/json
-  Accept: application/json
-}
-
 body:json {
   {
       "firstname" : "Qasim",
@@ -37,19 +32,25 @@ assert {
   res.status: eq 200
 }
 
+tests {
+  test("returns a numeric booking id", function() {
+    expect(res.getBody().bookingid).to.be.a("number");
+  });
+
+  test("echoes back the submitted booking", function() {
+    const booking = res.getBody().booking;
+    expect(booking.firstname).to.equal("Qasim");
+    expect(booking.lastname).to.equal("Mahmood");
+    expect(booking.totalprice).to.equal(999);
+    expect(booking.depositpaid).to.equal(true);
+    expect(booking.bookingdates.checkin).to.equal("2024-01-01");
+    expect(booking.bookingdates.checkout).to.equal("2025-01-01");
+    expect(booking.additionalneeds).to.equal("Halal Food");
+  });
+}
+
 docs {
-  Generated from cURL: curl -X POST \
-    https://restful-booker.herokuapp.com/booking \
-    -H 'Content-Type: application/json' \
-    -d '{
-      "firstname" : "Jim",
-      "lastname" : "Brown",
-      "totalprice" : 111,
-      "depositpaid" : true,
-      "bookingdates" : {
-          "checkin" : "2018-01-01",
-          "checkout" : "2019-01-01"
-      },
-      "additionalneeds" : "Breakfast"
-  }'
+  Creates the booking used by the rest of the positive lifecycle. The
+  generated id is captured into the bookingId runtime variable and consumed
+  by the subsequent get/update/delete requests.
 }

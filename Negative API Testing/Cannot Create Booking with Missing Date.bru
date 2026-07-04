@@ -1,17 +1,13 @@
 meta {
   name: Cannot Create Booking with Missing Date
   type: http
-  seq: 2
+  seq: 3
 }
 
 post {
   url: {{baseUrl}}/booking
   body: json
   auth: none
-}
-
-headers {
-  Content-Type: application/json
 }
 
 body:json {
@@ -32,18 +28,7 @@ assert {
 }
 
 docs {
-  Generated from cURL: curl -X POST \
-    https://restful-booker.herokuapp.com/booking \
-    -H 'Content-Type: application/json' \
-    -d '{
-      "firstname" : "Jim",
-      "lastname" : "Brown",
-      "totalprice" : 111,
-      "depositpaid" : true,
-      "bookingdates" : {
-          "checkin" : "2018-01-01",
-          "checkout" : "2019-01-01"
-      },
-      "additionalneeds" : "Breakfast"
-  }'
+  Omits the required bookingdates.checkout field. As with other validation
+  failures, Restful-Booker surfaces this as 500 Internal Server Error rather
+  than a 400 - the test pins the API's actual behaviour.
 }

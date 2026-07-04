@@ -11,8 +11,6 @@ put {
 }
 
 headers {
-  Content-Type: application/json
-  Accept: application/json
   Cookie: token={{token}}
 }
 
@@ -30,27 +28,31 @@ body:json {
   }
 }
 
+vars:post-response {
+  updatedFirstname: res.body.firstname
+  updatedLastname: res.body.lastname
+  updatedAdditionalNeeds: res.body.additionalneeds
+}
+
 assert {
   res.status: eq 200
   res.body: isDefined
-  res.body.additionalneeds: contains "Entertainment"
+}
+
+tests {
+  test("applies the full update", function() {
+    const booking = res.getBody();
+    expect(booking.additionalneeds).to.equal("Halal Food and Entertainment");
+    expect(booking.firstname).to.equal("Qasim");
+    expect(booking.totalprice).to.equal(999);
+  });
 }
 
 docs {
-  Generated from cURL: curl -X PUT \
-    https://restful-booker.herokuapp.com/booking/1 \
-    -H 'Content-Type: application/json' \
-    -H 'Accept: application/json' \
-    -H 'Cookie: token=abc123' \
-    -d '{
-      "firstname" : "James",
-      "lastname" : "Brown",
-      "totalprice" : 111,
-      "depositpaid" : true,
-      "bookingdates" : {
-          "checkin" : "2018-01-01",
-          "checkout" : "2019-01-01"
-      },
-      "additionalneeds" : "Breakfast"
-  }'
+  Replaces the booking created earlier via PUT, authenticated with the token
+  cookie captured by Create Token. Verifies the updated fields are returned.
+
+  The updated field values are also captured as runtime variables so the
+  Partial Update request can verify preservation against what this request
+  actually set, instead of duplicating the literals across files.
 }

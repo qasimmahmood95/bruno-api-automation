@@ -10,18 +10,29 @@ get {
   auth: none
 }
 
-headers {
-  Content-Type: application/json
-  Accept: application/json
-}
-
 assert {
   res.status: eq 200
   res.body: isDefined
-  res.body.firstname: eq "Qasim"
+}
+
+tests {
+  test("matches the booking schema", function() {
+    const booking = res.getBody();
+    expect(booking).to.include.all.keys(
+      "firstname", "lastname", "totalprice", "depositpaid", "bookingdates"
+    );
+    expect(booking.bookingdates).to.include.all.keys("checkin", "checkout");
+  });
+
+  test("returns the booking created earlier in the flow", function() {
+    const booking = res.getBody();
+    expect(booking.firstname).to.equal("Qasim");
+    expect(booking.lastname).to.equal("Mahmood");
+    expect(booking.totalprice).to.equal(999);
+  });
 }
 
 docs {
-  Generated from cURL: curl -i https://restful-booker.herokuapp.com/booking/1
-  
+  Fetches the booking created by Create Booking (via the bookingId runtime
+  variable) and validates both the response schema and the field values.
 }

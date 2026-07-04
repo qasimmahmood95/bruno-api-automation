@@ -1,0 +1,12 @@
+meta {
+  name: Negative API Testing
+  seq: 2
+}
+
+docs {
+  Error-handling and authorisation coverage: invalid field types, missing
+  required fields, malformed JSON, bad credentials, and mutations without a
+  valid token. A setup request creates a dedicated fixture booking so the
+  invalid-token tests target a booking that is guaranteed to exist, keeping
+  this folder independent of the positive suite and of seeded data.
+}

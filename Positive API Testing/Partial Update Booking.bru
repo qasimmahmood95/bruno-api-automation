@@ -11,8 +11,6 @@ patch {
 }
 
 headers {
-  Content-Type: application/json
-  Accept: application/json
   Cookie: token={{token}}
 }
 
@@ -24,18 +22,25 @@ body:json {
 
 assert {
   res.status: eq 200
-  res.body: isDefined 
-  res.body.totalprice: eq 1000
+  res.body: isDefined
+}
+
+tests {
+  test("updates only the patched field", function() {
+    expect(res.getBody().totalprice).to.equal(1000);
+  });
+
+  test("preserves fields not included in the patch", function() {
+    const booking = res.getBody();
+    expect(booking.firstname).to.equal(bru.getVar("updatedFirstname"));
+    expect(booking.lastname).to.equal(bru.getVar("updatedLastname"));
+    expect(booking.additionalneeds).to.equal(bru.getVar("updatedAdditionalNeeds"));
+  });
 }
 
 docs {
-  Generated from cURL: curl -X PATCH \
-    https://restful-booker.herokuapp.com/booking/1 \
-    -H 'Content-Type: application/json' \
-    -H 'Accept: application/json' \
-    -H 'Cookie: token=abc123' \
-    -d '{
-      "firstname" : "James",
-      "lastname" : "Brown"
-  }'
+  Partially updates the booking via PATCH, changing only totalprice, and
+  verifies that untouched fields keep the values set by the previous PUT -
+  compared against runtime variables captured from the PUT response, so the
+  expected values live in one place.
 }

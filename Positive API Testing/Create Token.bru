@@ -10,14 +10,10 @@ post {
   auth: none
 }
 
-headers {
-  Content-Type: application/json
-}
-
 body:json {
   {
-      "username" : "admin",
-      "password" : "password123"
+      "username" : "{{authUsername}}",
+      "password" : "{{authPassword}}"
   }
 }
 
@@ -29,12 +25,17 @@ assert {
   res.status: eq 200
 }
 
+tests {
+  test("returns a non-empty auth token", function() {
+    expect(res.getBody().token).to.be.a("string").that.is.not.empty;
+  });
+}
+
 docs {
-  Generated from cURL: curl -X POST \
-    https://restful-booker.herokuapp.com/auth \
-    -H 'Content-Type: application/json' \
-    -d '{
-      "username" : "admin",
-      "password" : "password123"
-  }'
+  Authenticates against /auth and stores the returned token in the token
+  runtime variable, which the update and delete requests send as a cookie.
+
+  Credentials come from the Restful-Booker environment. These are the
+  public, documented credentials of the Restful-Booker demo API - in a real
+  project they would be injected from a secret store, never committed.
 }
