@@ -1,17 +1,18 @@
 meta {
   name: Partial Update Booking
   type: http
-  seq: 7
+  seq: 9
 }
 
 patch {
   url: {{baseUrl}}/booking/{{bookingId}}
   body: json
-  auth: none
+  auth: basic
 }
 
-headers {
-  Cookie: token={{token}}
+auth:basic {
+  username: {{authUsername}}
+  password: {{authPassword}}
 }
 
 body:json {
@@ -43,4 +44,8 @@ docs {
   verifies that untouched fields keep the values set by the previous PUT -
   compared against runtime variables captured from the PUT response, so the
   expected values live in one place.
+
+  This request authenticates with Basic auth (the PUT before it uses the
+  token cookie), so the lifecycle covers both auth mechanisms the API
+  supports.
 }

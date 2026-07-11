@@ -1,0 +1,50 @@
+meta {
+  name: Cannot Update Nonexistent Booking
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/booking/999999
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: {{authUsername}}
+  password: {{authPassword}}
+}
+
+body:json {
+  {
+      "firstname" : "Ghost",
+      "lastname" : "Booking",
+      "totalprice" : 1,
+      "depositpaid" : false,
+      "bookingdates" : {
+          "checkin" : "2024-01-01",
+          "checkout" : "2024-01-02"
+      },
+      "additionalneeds" : "None"
+  }
+}
+
+assert {
+  res.status: eq 405
+}
+
+tests {
+  test("update of a nonexistent booking is rejected", function() {
+    expect(res.getStatus()).to.equal(405);
+  });
+}
+
+docs {
+  Attempts a fully authenticated (Basic auth), fully valid update against a
+  booking id that does not exist. Restful-Booker responds 405 Method Not
+  Allowed rather than the conventional 404 Not Found - another pinned API
+  quirk (see the README's quirks table).
+
+  The id 999999 is safely out of range: the demo API's database reseeds
+  with low ids every 10 minutes.
+}

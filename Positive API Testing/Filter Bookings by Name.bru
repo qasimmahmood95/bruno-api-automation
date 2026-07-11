@@ -1,0 +1,37 @@
+meta {
+  name: Filter Bookings by Name
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/booking?firstname=Qasim&lastname=Mahmood
+  body: none
+  auth: none
+}
+
+params:query {
+  firstname: Qasim
+  lastname: Mahmood
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("returns an array of booking ids", function() {
+    expect(res.getBody()).to.be.an("array");
+  });
+
+  test("filtered results include the booking created earlier", function() {
+    const ids = res.getBody().map(function(entry) { return entry.bookingid; });
+    expect(ids).to.include(Number(bru.getVar("bookingId")));
+  });
+}
+
+docs {
+  Exercises the name-filtering feature of GET /booking: querying by the
+  firstname/lastname submitted in Create Booking must return a result set
+  containing that booking's id.
+}

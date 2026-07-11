@@ -1,0 +1,39 @@
+meta {
+  name: Filter Bookings by Date
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/booking?checkin=2023-12-31&checkout=2025-01-02
+  body: none
+  auth: none
+}
+
+params:query {
+  checkin: 2023-12-31
+  checkout: 2025-01-02
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("returns an array of booking ids", function() {
+    expect(res.getBody()).to.be.an("array");
+  });
+}
+
+docs {
+  Exercises the date-filtering feature of GET /booking. The documented
+  contract is "bookings that check in after and check out before the given
+  dates".
+
+  The assertions here are deliberately bounded to the stable part of the
+  contract (200 + array shape): Restful-Booker's date-filter comparison
+  logic is known to be buggy (boundary handling differs from the docs), so
+  pinning specific result membership would make the suite flaky against a
+  bug this repo doesn't control. In a real engagement the boundary bug
+  would be filed and the stronger assertion added once fixed.
+}
