@@ -1,0 +1,33 @@
+meta {
+  name: Cannot Delete Nonexistent Booking
+  type: http
+  seq: 9
+}
+
+delete {
+  url: {{baseUrl}}/booking/999999
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: {{authUsername}}
+  password: {{authPassword}}
+}
+
+assert {
+  res.status: eq 405
+}
+
+tests {
+  test("delete of a nonexistent booking is rejected", function() {
+    expect(res.getStatus()).to.equal(405);
+  });
+}
+
+docs {
+  Attempts a fully authenticated (Basic auth) delete against a booking id
+  that does not exist. Restful-Booker responds 405 Method Not Allowed
+  rather than the conventional 404 Not Found - a pinned API quirk (see the
+  README's quirks table).
+}
