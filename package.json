@@ -1,0 +1,20 @@
+{
+  "name": "bruno-api-automation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API test automation suite for the Restful-Booker API, built with Bruno",
+  "author": "Qasim Mahmood",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "bru run --env Restful-Booker",
+    "test:positive": "bru run \"Positive API Testing\" --env Restful-Booker",
+    "test:negative": "bru run \"Negative API Testing\" --env Restful-Booker",
+    "test:report": "node -e \"fs.mkdirSync('reports',{recursive:true})\" && npm test -- --reporter-html reports/results.html --reporter-junit reports/junit.xml"
+  },
+  "devDependencies": {
+    "@usebruno/cli": "^3.5.1"
+  }
+}
