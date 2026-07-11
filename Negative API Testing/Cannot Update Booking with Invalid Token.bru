@@ -1,32 +1,36 @@
 meta {
   name: Cannot Update Booking with Invalid Token
   type: http
-  seq: 5
+  seq: 6
 }
 
 put {
-  url: {{baseUrl}}/booking/1
+  url: {{baseUrl}}/booking/{{negativeBookingId}}
   body: json
   auth: none
 }
 
 headers {
-  Content-Type: application/json
-  Accept: application/json
-  Cookie: token=abc123
+  Cookie: token=invalid-token
 }
 
 body:json {
   {
-      "firstname" : "Qasim",
-      "lastname" : "Mahmood",
+      "firstname" : "Should",
+      "lastname" : "NotUpdate",
       "totalprice" : 999,
       "depositpaid" : true,
       "bookingdates" : {
           "checkin" : "2024-01-01",
           "checkout" : "2025-01-01"
       },
-      "additionalneeds" : "Halal Food and Entertainment"
+      "additionalneeds" : "None"
+  }
+}
+
+script:pre-request {
+  if (!bru.getVar("negativeBookingId")) {
+    throw new Error("negativeBookingId is not set - run 'Setup - Create Fixture Booking' first (or run the folder as a whole)");
   }
 }
 
@@ -35,20 +39,10 @@ assert {
 }
 
 docs {
-  Generated from cURL: curl -X PUT \
-    https://restful-booker.herokuapp.com/booking/1 \
-    -H 'Content-Type: application/json' \
-    -H 'Accept: application/json' \
-    -H 'Cookie: token=abc123' \
-    -d '{
-      "firstname" : "James",
-      "lastname" : "Brown",
-      "totalprice" : 111,
-      "depositpaid" : true,
-      "bookingdates" : {
-          "checkin" : "2018-01-01",
-          "checkout" : "2019-01-01"
-      },
-      "additionalneeds" : "Breakfast"
-  }'
+  Attempts to update the fixture booking (created by the setup request) with
+  an invalid auth token. The API must refuse with 403 Forbidden.
+
+  The pre-request guard fails fast if the fixture id was never captured -
+  without it, the API's token check (which runs before the id is resolved)
+  would return 403 even for a garbage URL and the test would pass vacuously.
 }

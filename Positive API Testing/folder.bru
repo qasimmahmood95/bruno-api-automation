@@ -1,0 +1,12 @@
+meta {
+  name: Positive API Testing
+  seq: 1
+}
+
+docs {
+  Happy-path coverage of the full booking lifecycle. Requests are chained:
+  Create Booking stores the generated id in the bookingId runtime variable,
+  Create Token stores an auth token, and the update/delete requests consume
+  both. Run this folder as a whole (in order) rather than as individual
+  requests.
+}

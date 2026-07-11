@@ -11,7 +11,6 @@ delete {
 }
 
 headers {
-  Content-Type: application/json
   Cookie: token={{token}}
 }
 
@@ -20,8 +19,9 @@ assert {
 }
 
 docs {
-  Generated from cURL: curl -X DELETE \
-    https://restful-booker.herokuapp.com/booking/1 \
-    -H 'Content-Type: application/json' \
-    -H 'Cookie: token=abc123'
+  Deletes the booking created at the start of the lifecycle.
+
+  Note: Restful-Booker returns 201 Created for a successful DELETE rather
+  than the conventional 200/204. The test asserts the API's actual,
+  documented behaviour.
 }

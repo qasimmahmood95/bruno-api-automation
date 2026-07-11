@@ -15,6 +15,9 @@ assert {
 }
 
 docs {
-  Generated from cURL: curl -i https://restful-booker.herokuapp.com/ping
-  
+  Verifies the API is reachable before the rest of the suite runs.
+
+  Note: Restful-Booker's /ping endpoint returns 201 Created rather than the
+  conventional 200 OK. This is the documented behaviour of the API, so the
+  test asserts 201 deliberately.
 }

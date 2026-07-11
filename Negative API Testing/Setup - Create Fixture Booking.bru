@@ -1,0 +1,50 @@
+meta {
+  name: Setup - Create Fixture Booking
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/booking
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "firstname" : "Negative",
+      "lastname" : "Fixture",
+      "totalprice" : 1,
+      "depositpaid" : false,
+      "bookingdates" : {
+          "checkin" : "2024-01-01",
+          "checkout" : "2024-01-02"
+      },
+      "additionalneeds" : "None"
+  }
+}
+
+vars:post-response {
+  negativeBookingId: res.body.bookingid
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("fixture booking is created", function() {
+    expect(res.getBody().bookingid).to.be.a("number");
+  });
+}
+
+docs {
+  Test isolation: creates a dedicated fixture booking and stores its id in
+  the negativeBookingId runtime variable. The invalid-token update/delete
+  tests target this fixture instead of a hardcoded id, so this suite never
+  depends on seeded data or on the positive suite having run first.
+
+  No teardown is needed: Restful-Booker resets its database every 10
+  minutes, and the invalid-token tests are expected to fail to mutate the
+  fixture anyway.
+}

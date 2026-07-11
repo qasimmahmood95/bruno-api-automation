@@ -1,0 +1,21 @@
+headers {
+  Accept: application/json
+}
+
+docs {
+  # Restful-Booker API Test Suite
+
+  Automated API tests for the Restful-Booker hotel booking API
+  (https://restful-booker.herokuapp.com), organised into two suites:
+
+  - Positive API Testing: an end-to-end booking lifecycle (create, read,
+    update, partial update, delete, verify deletion) with request chaining
+    via runtime variables.
+  - Negative API Testing: invalid payloads, malformed JSON, bad credentials
+    and unauthorised mutations.
+
+  Configuration such as the base URL and auth credentials lives in the
+  Restful-Booker environment (environments/Restful-Booker.bru). Runtime
+  variables (bookingId, token, negativeBookingId) are set dynamically by
+  post-response scripts, so requests within a suite must run in sequence.
+}

@@ -14,7 +14,21 @@ assert {
   res.status: eq 200
 }
 
+tests {
+  test("returns a non-empty list of bookings", function() {
+    const bookings = res.getBody();
+    expect(bookings).to.be.an("array").that.is.not.empty;
+  });
+
+  test("every entry exposes a numeric bookingid", function() {
+    const invalid = res.getBody().filter(function(entry) {
+      return !Number.isInteger(entry.bookingid);
+    });
+    expect(invalid).to.be.empty;
+  });
+}
+
 docs {
-  Generated from cURL: curl -i https://restful-booker.herokuapp.com/booking
-  
+  Lists all booking ids currently held by the API. Restful-Booker seeds its
+  database with sample bookings, so the list is expected to be non-empty.
 }

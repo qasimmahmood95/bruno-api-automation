@@ -1,12 +1,12 @@
 meta {
   name: Cannot Create Booking with Invalid JSON
   type: http
-  seq: 3
+  seq: 4
 }
 
 post {
   url: {{baseUrl}}/booking
-  body: json
+  body: text
   auth: none
 }
 
@@ -14,7 +14,7 @@ headers {
   Content-Type: application/json
 }
 
-body:json {
+body:text {
   {
       "firstname" : "Qasim",
       "lastname" : "Mahmood",
@@ -25,7 +25,6 @@ body:json {
           "checkout" : "2025-01-01"
       },
       "additionalneeds" : "Halal Food"
-  
 }
 
 assert {
@@ -33,18 +32,15 @@ assert {
 }
 
 docs {
-  Generated from cURL: curl -X POST \
-    https://restful-booker.herokuapp.com/booking \
-    -H 'Content-Type: application/json' \
-    -d '{
-      "firstname" : "Jim",
-      "lastname" : "Brown",
-      "totalprice" : 111,
-      "depositpaid" : true,
-      "bookingdates" : {
-          "checkin" : "2018-01-01",
-          "checkout" : "2019-01-01"
-      },
-      "additionalneeds" : "Breakfast"
-  }'
+  Sends a deliberately malformed JSON payload (the closing brace of the
+  booking object is missing) with a Content-Type of application/json,
+  verifying the API rejects it with 400 Bad Request.
+
+  Wire-level note: Bruno's runtime JSON-encodes the request body when the
+  content type is JSON, so the payload arrives as a JSON string literal
+  rather than raw broken syntax. The API's JSON parser (body-parser in
+  strict mode) rejects both forms identically with 400 - verified
+  empirically against Express - so the test exercises the same rejection
+  path either way. The body is kept as an explicit text block to make the
+  malformed intent visible in review.
 }
