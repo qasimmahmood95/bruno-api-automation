@@ -12,6 +12,7 @@
     "test": "bru run --env Restful-Booker",
     "test:positive": "bru run \"Positive API Testing\" --env Restful-Booker",
     "test:negative": "bru run \"Negative API Testing\" --env Restful-Booker",
+    "test:local": "bru run --env Restful-Booker --env-var baseUrl=http://localhost:3001",
     "test:report": "node -e \"fs.mkdirSync('reports',{recursive:true})\" && npm test -- --reporter-html reports/results.html --reporter-junit reports/junit.xml"
   },
   "devDependencies": {
