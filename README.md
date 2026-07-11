@@ -24,12 +24,14 @@ Requests run in sequence; `bookingId` and `token` are captured via `vars:post-re
 | 1 | Health Check | GET | `/ping` | 201 | API is reachable before the suite runs |
 | 2 | Get Booking IDs | GET | `/booking` | 200 | Non-empty array; every entry has a numeric `bookingid` |
 | 3 | Create Booking | POST | `/booking` | 200 | Numeric id returned; response echoes the full submitted booking |
-| 4 | Get Booking | GET | `/booking/{id}` | 200 | Response schema (all required keys) plus field values from step 3 |
-| 5 | Create Token | POST | `/auth` | 200 | Non-empty auth token issued |
-| 6 | Update Booking | PUT | `/booking/{id}` | 200 | Full replacement applied, authenticated via token cookie |
-| 7 | Partial Update Booking | PATCH | `/booking/{id}` | 200 | Patched field changed; untouched fields preserved |
-| 8 | Delete Booking | DELETE | `/booking/{id}` | 201 | Booking deleted (API returns 201, not 200/204) |
-| 9 | Cannot Get Booking After Deleting | GET | `/booking/{id}` | 404 | Delete actually removed the resource |
+| 4 | Filter Bookings by Name | GET | `/booking?firstname=…&lastname=…` | 200 | Name filter returns the booking created in step 3 |
+| 5 | Filter Bookings by Date | GET | `/booking?checkin=…&checkout=…` | 200 | Date filter honours the contract's stable part (see request docs) |
+| 6 | Get Booking | GET | `/booking/{id}` | 200 | Response schema (all required keys) plus field values from step 3 |
+| 7 | Create Token | POST | `/auth` | 200 | Non-empty auth token issued |
+| 8 | Update Booking | PUT | `/booking/{id}` | 200 | Full replacement applied, authenticated via token cookie |
+| 9 | Partial Update Booking | PATCH | `/booking/{id}` | 200 | Patched field changed, untouched fields preserved; authenticated via Basic auth |
+| 10 | Delete Booking | DELETE | `/booking/{id}` | 201 | Booking deleted (API returns 201, not 200/204) |
+| 11 | Cannot Get Booking After Deleting | GET | `/booking/{id}` | 404 | Delete actually removed the resource |
 
 ### Negative suite — validation, auth and authorization
 
@@ -44,6 +46,8 @@ A setup request creates a dedicated fixture booking (`negativeBookingId`) so the
 | 5 | Cannot Create Token with Invalid Credentials | POST | `/auth` | 200 + `"Bad credentials"` | No token issued; failure reason returned (API quirk — see below) |
 | 6 | Cannot Update Booking with Invalid Token | PUT | `/booking/{fixtureId}` | 403 | Unauthorized full update is forbidden |
 | 7 | Cannot Delete Booking with Invalid Token | DELETE | `/booking/{fixtureId}` | 403 | Unauthorized delete is forbidden |
+| 8 | Cannot Update Nonexistent Booking | PUT | `/booking/999999` | 405 | Authenticated update of a missing booking is rejected (API quirk: 405, not 404) |
+| 9 | Cannot Delete Nonexistent Booking | DELETE | `/booking/999999` | 405 | Authenticated delete of a missing booking is rejected (API quirk: 405, not 404) |
 
 ## Project structure
 
@@ -53,10 +57,10 @@ bruno-api-automation/
 ├── collection.bru                 # Collection-level docs
 ├── environments/
 │   └── Restful-Booker.bru         # baseUrl + auth credentials
-├── Positive API Testing/          # 9 requests: full booking lifecycle
+├── Positive API Testing/          # 11 requests: full booking lifecycle + filters
 │   ├── folder.bru                 # seq: 1 — runs first
 │   └── *.bru
-├── Negative API Testing/          # 7 requests: setup fixture + error cases
+├── Negative API Testing/          # 9 requests: setup fixture + error cases
 │   ├── folder.bru                 # seq: 2 — runs second
 │   └── *.bru
 ├── .github/workflows/
@@ -75,6 +79,7 @@ npm test               # run both suites against the Restful-Booker environment
 npm run test:positive  # positive lifecycle suite only
 npm run test:negative  # negative suite only
 npm run test:report    # full run with HTML + JUnit reports in reports/
+npm run test:local     # full run against a local instance on :3001 (see below)
 ```
 
 To explore the collection interactively, open the repo root in the [Bruno desktop app](https://www.usebruno.com/downloads), select the **Restful-Booker** environment, and run the folders in order. Requests within a suite are chained via runtime variables, so run a folder as a whole rather than individual requests.
@@ -85,7 +90,7 @@ The public demo instance is shared and occasionally slow or down. Restful-Booker
 
 ```bash
 docker run -d -p 3001:3001 mwinteringham/restfulbooker
-npx bru run --env Restful-Booker --env-var baseUrl=http://localhost:3001
+npm run test:local
 ```
 
 ## CI/CD
@@ -97,7 +102,12 @@ The [API Tests workflow](.github/workflows/api-tests.yml) runs on:
 - a nightly cron at 06:17 UTC (catches regressions in the live API; scheduled off the top of the hour, which GitHub throttles)
 - manual dispatch
 
-Each run executes `npm run test:report` with one automatic retry and a hard job timeout — the target is a shared demo API on Heroku, so a single retry absorbs cold starts without masking real failures. Reports are uploaded as a build artifact (14-day retention) and a per-test summary is published as a check run via `mikepenz/action-junit-report`, so pass/fail is visible directly in the PR checks tab without downloading anything.
+Each run executes two parallel jobs:
+
+- **Live API** — runs `npm run test:report` against the public demo instance, with one automatic retry and a hard job timeout (a shared Heroku demo API needs a retry to absorb cold starts, without masking real failures). Reports are uploaded as a build artifact (14-day retention) and a per-test summary is published as a check run via `mikepenz/action-junit-report`, so pass/fail is visible directly in the PR checks tab.
+- **Hermetic** — spins up Restful-Booker as a service container inside the job and runs the same suite against it. No external dependency, no flake: this job separates "the suite is broken" from "the demo API is having a bad day", and proves the collection is environment-portable.
+
+Dependabot keeps `@usebruno/cli` and the workflow actions current with weekly update PRs.
 
 ## Design decisions
 
@@ -105,6 +115,7 @@ Each run executes `npm run test:report` with one automatic retry and a hard job 
 - **Test isolation.** The negative suite creates its own fixture booking instead of borrowing seeded data or leaning on the positive suite, and the invalid-token tests guard against a silently missing fixture with a fail-fast pre-request check. Either suite can run standalone.
 - **Deterministic ordering.** `folder.bru` `seq` values fix suite order, and per-request `seq` values fix request order within each suite, so CLI runs are reproducible.
 - **Two assertion layers.** Declarative `assert` blocks pin status codes and key fields at a glance; `tests {}` blocks with chai-style `expect` are reserved for checks `assert` can't express — schema keys, body-echo comparisons, array shape, cross-request preservation. No check is duplicated across the two layers.
+- **Both auth mechanisms covered.** The lifecycle authenticates the PUT with the token cookie and the PATCH with Basic auth — the two schemes Restful-Booker supports — so neither path can silently regress.
 - **Pin actual behaviour, don't idealize it.** Where Restful-Booker deviates from HTTP conventions, the tests assert what the API really does, and the `docs` blocks flag each deviation as a would-be bug report.
 - **Parameterized configuration.** Base URL and credentials live in the environment file, not in requests. These are Restful-Booker's public, documented demo credentials — in a real project they'd be injected from a secret store, never committed.
 - **Self-documenting requests.** Every `.bru` file has a `docs` block stating intent and rationale, readable in both the repo and the Bruno app.
@@ -119,6 +130,8 @@ These are deliberate assertions of Restful-Booker's actual behaviour. In a produ
 | `DELETE /booking/{id}` success | 200 / 204 | **201 Created** |
 | Invalid field types / missing required fields | 400 Bad Request | **500 Internal Server Error** |
 | Auth with bad credentials | 401 Unauthorized | **200 OK** with `{"reason": "Bad credentials"}` |
+| Update/delete of a nonexistent booking (authenticated) | 404 Not Found | **405 Method Not Allowed** |
+| Date-filter boundary handling on `GET /booking` | per documented contract | **known buggy** — asserted only for the stable part of the contract |
 
 ## License
 
