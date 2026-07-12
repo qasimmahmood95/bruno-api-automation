@@ -38,7 +38,7 @@ jobs:
       # The target is a shared public demo API on Heroku; one retry absorbs
       # cold starts and transient downtime without masking real failures.
       - name: Run API tests with reporting
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           command: npm run test:report
           max_attempts: 2
