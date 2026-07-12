@@ -57,7 +57,7 @@ jobs:
       # green run.
       - name: Publish test summary
         if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@v6
         with:
           report_paths: reports/junit.xml
           check_name: Bruno API Test Results
