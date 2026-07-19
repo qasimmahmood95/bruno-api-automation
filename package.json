@@ -16,6 +16,6 @@
     "test:report": "node -e \"fs.mkdirSync('reports',{recursive:true})\" && npm test -- --reporter-html reports/results.html --reporter-junit reports/junit.xml"
   },
   "devDependencies": {
-    "@usebruno/cli": "^3.5.1"
+    "@usebruno/cli": "^3.5.2"
   }
 }
